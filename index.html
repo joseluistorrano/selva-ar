@@ -3,61 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Selva AR - Maqueta</title>
+  <title>Selva AR - Colegio Miraflores</title>
 
-  <!-- A-Frame y AR.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; font-family: sans-serif; }
+    body { overflow: hidden; font-family: sans-serif; background: #0d1f10; }
 
-    /* Pantalla de bienvenida */
     #pantalla-inicio {
       position: fixed;
       inset: 0;
-      background: linear-gradient(160deg, #0a2e10, #1b5e20);
+      background: #0d1f10;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      padding: 30px;
+      padding: 30px 24px;
       text-align: center;
     }
-    #pantalla-inicio h1 {
-      font-size: 28px;
-      color: #b9f6ca;
-      font-weight: 900;
-      margin-bottom: 12px;
+    #pantalla-inicio .glow-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 220px;
+      background: radial-gradient(ellipse at 50% 0%, #1a4a1e 0%, transparent 70%);
+      pointer-events: none;
     }
-    #pantalla-inicio p {
-      font-size: 15px;
-      color: #a5d6a7;
-      margin-bottom: 30px;
+    #pantalla-inicio .glow-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 160px;
+      background: radial-gradient(ellipse at 50% 100%, #1a3a1e 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #pantalla-inicio img.logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 8px #2e7d3266);
+    }
+    #pantalla-inicio .colegio-nombre {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4caf50;
+      margin-bottom: 2px;
+      position: relative;
+      z-index: 1;
+    }
+    #pantalla-inicio .colegio-lema {
+      font-size: 12px;
+      font-weight: 700;
+      font-style: italic;
+      color: #81c784;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    #pantalla-inicio h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #e8f5e9;
+      line-height: 1.25;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    #pantalla-inicio .subtitulo {
+      font-size: 13px;
+      color: #81c784;
       line-height: 1.6;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    #pantalla-inicio .instruccion-box {
+      background: #1b3a1f;
+      border: 1px solid #2e7d32;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 300px;
+      position: relative;
+      z-index: 1;
+    }
+    #pantalla-inicio .instruccion-box p {
+      font-size: 12px;
+      color: #a5d6a7;
+      line-height: 1.6;
+      margin: 0;
     }
     #btn-iniciar {
-      background: #69f0ae;
+      background: #4caf50;
       color: #0a2e10;
       border: none;
-      padding: 16px 36px;
-      font-size: 17px;
+      padding: 16px 0;
+      width: 100%;
+      max-width: 300px;
+      font-size: 16px;
       font-weight: 900;
       border-radius: 50px;
       cursor: pointer;
-      box-shadow: 0 0 30px #69f0ae88;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.5px;
     }
-    .emoji-grande { font-size: 64px; margin-bottom: 20px; }
-
-    /* Instrucción flotante mientras AR está activo */
+    #pantalla-inicio .aviso-camara {
+      font-size: 11px;
+      color: #388e3c;
+      margin-top: 14px;
+      position: relative;
+      z-index: 1;
+    }
     #instruccion {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(10, 46, 16, 0.85);
+      background: rgba(10, 46, 16, 0.88);
       color: #b9f6ca;
       padding: 10px 22px;
       border-radius: 30px;
@@ -67,37 +137,48 @@
       display: none;
       text-align: center;
       border: 1px solid #2e7d32;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-  <!-- Pantalla de bienvenida -->
   <div id="pantalla-inicio">
-    <div class="emoji-grande">🌿</div>
-    <h1>¡Bienvenidos a la<br>Selva Mágica!</h1>
-    <p>
-      Apunta la cámara al <strong>marcador</strong> que está en la maqueta
-      y verás a los exploradores de la selva aparecer.
+    <div class="glow-top"></div>
+
+    <img class="logo" src="logo.jpg" alt="Escudo Colegio Miraflores" />
+
+    <p class="colegio-nombre">Colegio Miraflores</p>
+    <p class="colegio-lema">"México de mis amores"</p>
+
+    <h1>¡Bienvenidos al<br>sureste mexicano!</h1>
+
+    <p class="subtitulo">
+      Apunta la cámara al marcador<br>
+      en la maqueta y descubre<br>
+      a nuestros exploradores 🐆
     </p>
+
+    <div class="instruccion-box">
+      <p>
+        📱<br>
+        Toca el botón, apunta al<br>
+        <strong style="color:#b9f6ca;">marcador impreso</strong> en la maqueta<br>
+        y verás la magia aparecer
+      </p>
+    </div>
+
     <button id="btn-iniciar" onclick="iniciarAR()">
-      🎥 Abrir la cámara
+      🎥 &nbsp; Abrir la cámara
     </button>
+
+    <p class="aviso-camara">Se solicitará permiso para usar la cámara</p>
+
+    <div class="glow-bottom"></div>
   </div>
 
-  <!-- Instrucción en pantalla durante AR -->
   <div id="instruccion">🌿 Apunta al marcador de la maqueta</div>
 
-  <!-- Escena de Realidad Aumentada -->
-  <!--
-    MARCADOR: Se usa el marcador "HIRO" por defecto.
-    Descárgalo en: https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png
-    Imprímelo y pégalo en la maqueta.
-
-    VIDEO: Reemplaza "alumno.webm" con el nombre de tu archivo de video.
-    El video debe estar en formato WebM con fondo transparente (canal alfa).
-    Sube tanto index.html como alumno.webm a GitHub Pages.
-  -->
   <a-scene
     id="escena-ar"
     embedded
@@ -106,8 +187,6 @@
     vr-mode-ui="enabled: false"
     style="display:none;"
   >
-
-    <!-- Asset: el video del alumno sin fondo -->
     <a-assets>
       <video
         id="video-alumno"
@@ -120,15 +199,7 @@
       ></video>
     </a-assets>
 
-    <!-- Marcador HIRO: cuando la cámara lo detecte, aparece el video -->
     <a-marker preset="hiro" id="marcador">
-
-      <!--
-        El video aparece centrado sobre el marcador.
-        Ajusta width y height para cambiar el tamaño del "holograma".
-        position="0 0.5 0" lo eleva un poco sobre la maqueta.
-        rotation="-90 0 0" lo orienta hacia arriba.
-      -->
       <a-video
         src="#video-alumno"
         width="1.8"
@@ -137,24 +208,17 @@
         rotation="-90 0 0"
         transparent="true"
       ></a-video>
-
     </a-marker>
 
-    <!-- Cámara AR -->
     <a-entity camera></a-entity>
-
   </a-scene>
 
   <script>
     function iniciarAR() {
-      // Ocultar pantalla de bienvenida
       document.getElementById('pantalla-inicio').style.display = 'none';
-      // Mostrar escena AR
       document.getElementById('escena-ar').style.display = 'block';
-      // Mostrar instrucción
       document.getElementById('instruccion').style.display = 'block';
 
-      // Cuando el marcador es detectado, reproducir el video
       const marcador = document.getElementById('marcador');
       const video = document.getElementById('video-alumno');
 
