@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Selva AR - Maqueta</title>
+
+  <!-- A-Frame y AR.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; font-family: sans-serif; }
+
+    /* Pantalla de bienvenida */
+    #pantalla-inicio {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #0a2e10, #1b5e20);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 30px;
+      text-align: center;
+    }
+    #pantalla-inicio h1 {
+      font-size: 28px;
+      color: #b9f6ca;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    #pantalla-inicio p {
+      font-size: 15px;
+      color: #a5d6a7;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    #btn-iniciar {
+      background: #69f0ae;
+      color: #0a2e10;
+      border: none;
+      padding: 16px 36px;
+      font-size: 17px;
+      font-weight: 900;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 30px #69f0ae88;
+    }
+    .emoji-grande { font-size: 64px; margin-bottom: 20px; }
+
+    /* Instrucción flotante mientras AR está activo */
+    #instruccion {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 46, 16, 0.85);
+      color: #b9f6ca;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 999;
+      display: none;
+      text-align: center;
+      border: 1px solid #2e7d32;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Pantalla de bienvenida -->
+  <div id="pantalla-inicio">
+    <div class="emoji-grande">🌿</div>
+    <h1>¡Bienvenidos a la<br>Selva Mágica!</h1>
+    <p>
+      Apunta la cámara al <strong>marcador</strong> que está en la maqueta
+      y verás a los exploradores de la selva aparecer.
+    </p>
+    <button id="btn-iniciar" onclick="iniciarAR()">
+      🎥 Abrir la cámara
+    </button>
+  </div>
+
+  <!-- Instrucción en pantalla durante AR -->
+  <div id="instruccion">🌿 Apunta al marcador de la maqueta</div>
+
+  <!-- Escena de Realidad Aumentada -->
+  <!--
+    MARCADOR: Se usa el marcador "HIRO" por defecto.
+    Descárgalo en: https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png
+    Imprímelo y pégalo en la maqueta.
+
+    VIDEO: Reemplaza "alumno.webm" con el nombre de tu archivo de video.
+    El video debe estar en formato WebM con fondo transparente (canal alfa).
+    Sube tanto index.html como alumno.webm a GitHub Pages.
+  -->
+  <a-scene
+    id="escena-ar"
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;"
+    renderer="logarithmicDepthBuffer: true; antialias: true;"
+    vr-mode-ui="enabled: false"
+    style="display:none;"
+  >
+
+    <!-- Asset: el video del alumno sin fondo -->
+    <a-assets>
+      <video
+        id="video-alumno"
+        src="alumno.webm"
+        preload="auto"
+        loop="true"
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+    </a-assets>
+
+    <!-- Marcador HIRO: cuando la cámara lo detecte, aparece el video -->
+    <a-marker preset="hiro" id="marcador">
+
+      <!--
+        El video aparece centrado sobre el marcador.
+        Ajusta width y height para cambiar el tamaño del "holograma".
+        position="0 0.5 0" lo eleva un poco sobre la maqueta.
+        rotation="-90 0 0" lo orienta hacia arriba.
+      -->
+      <a-video
+        src="#video-alumno"
+        width="1.8"
+        height="2.4"
+        position="0 0 0"
+        rotation="-90 0 0"
+        transparent="true"
+      ></a-video>
+
+    </a-marker>
+
+    <!-- Cámara AR -->
+    <a-entity camera></a-entity>
+
+  </a-scene>
+
+  <script>
+    function iniciarAR() {
+      // Ocultar pantalla de bienvenida
+      document.getElementById('pantalla-inicio').style.display = 'none';
+      // Mostrar escena AR
+      document.getElementById('escena-ar').style.display = 'block';
+      // Mostrar instrucción
+      document.getElementById('instruccion').style.display = 'block';
+
+      // Cuando el marcador es detectado, reproducir el video
+      const marcador = document.getElementById('marcador');
+      const video = document.getElementById('video-alumno');
+
+      marcador.addEventListener('markerFound', () => {
+        video.play();
+        document.getElementById('instruccion').textContent = '✨ ¡Explorador detectado!';
+      });
+
+      marcador.addEventListener('markerLost', () => {
+        video.pause();
+        document.getElementById('instruccion').textContent = '🌿 Apunta al marcador de la maqueta';
+      });
+    }
+  </script>
+
+</body>
+</html>
