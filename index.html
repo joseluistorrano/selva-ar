@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Exploradores de Yucatán - Colegio Miraflores</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; font-family: sans-serif; background: #0a2e10; }
+
+    #pantalla-inicio {
+      position: fixed; inset: 0;
+      background: linear-gradient(180deg, #0a2e10 0%, #1a4a1a 50%, #0d3010 100%);
+      display: flex; flex-direction: column;
+      align-items: center; z-index: 100; overflow: hidden;
+    }
+    #pantalla-inicio svg.fondo {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+    }
+    .header {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 18px 18px 8px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+      width: 100%;
+    }
+    .header img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 4px; }
+    .header .nombre { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #b9f6ca; }
+    .header .lema { font-size: 11px; font-weight: 700; font-style: italic; color: #81c784; }
+    .header h1 { font-size: 14px; font-weight: 900; color: white; margin-top: 3px; }
+    .menu-grid {
+      position: relative; z-index: 10;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; padding: 10px 14px;
+      width: 100%; max-width: 420px; margin-top: 6px;
+    }
+    .menu-btn {
+      background: rgba(0,0,0,0.58); backdrop-filter: blur(8px);
+      border: 1px solid rgba(105,240,174,0.35);
+      border-radius: 16px; padding: 14px 8px;
+      text-align: center; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s;
+    }
+    .menu-btn:active { transform: scale(0.95); }
+    .menu-btn .emoji { font-size: 28px; margin-bottom: 4px; }
+    .menu-btn .etiqueta { font-size: 13px; font-weight: 800; color: white; }
+
+    #escena-ar { display: none; }
+
+    #btn-volver {
+      display: none;
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,46,16,0.88); color: #b9f6ca;
+      border: 1px solid rgba(105,240,174,0.5);
+      border-radius: 30px; padding: 14px 40px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; z-index: 999;
+      white-space: nowrap; backdrop-filter: blur(6px);
+    }
+    #instruccion {
+      display: none;
+      position: fixed; top: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7); color: #b9f6ca;
+      border: 1px solid rgba(105,240,174,0.4);
+      border-radius: 30px; padding: 10px 22px;
+      font-size: 13px; font-weight: 700;
+      z-index: 999; white-space: nowrap;
+    }
+    #touch-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 500;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="pantalla-inicio">
+  <svg class="fondo" viewBox="0 0 340 620" xmlns="http://www.w3.org/2000/svg">
+    <rect x="-8" y="280" width="22" height="340" rx="8" fill="#143a08"/>
+    <ellipse cx="3" cy="265" rx="38" ry="52" fill="#1a5a0a" opacity="0.85"/>
+    <ellipse cx="3" cy="235" rx="28" ry="38" fill="#2a6a1a" opacity="0.75"/>
+    <ellipse cx="3" cy="210" rx="20" ry="28" fill="#3a7a2a" opacity="0.6"/>
+    <rect x="326" y="260" width="22" height="360" rx="8" fill="#143a08"/>
+    <ellipse cx="337" cy="245" rx="40" ry="55" fill="#1a5a0a" opacity="0.85"/>
+    <ellipse cx="337" cy="212" rx="30" ry="40" fill="#2a6a1a" opacity="0.75"/>
+    <ellipse cx="337" cy="185" rx="22" ry="30" fill="#3a7a2a" opacity="0.6"/>
+    <rect x="158" y="320" width="24" height="300" rx="10" fill="#3a2a10"/>
+    <rect x="162" y="320" width="6" height="300" rx="3" fill="#4a3a18" opacity="0.5"/>
+    <ellipse cx="170" cy="305" rx="52" ry="62" fill="#1a6010" opacity="0.9"/>
+    <ellipse cx="148" cy="295" rx="35" ry="42" fill="#2a7020" opacity="0.8"/>
+    <ellipse cx="192" cy="298" rx="33" ry="40" fill="#2a7020" opacity="0.8"/>
+    <ellipse cx="170" cy="278" rx="40" ry="48" fill="#3a8030" opacity="0.75"/>
+    <ellipse cx="170" cy="258" rx="28" ry="32" fill="#4a9040" opacity="0.65"/>
+    <path d="M148 310 Q138 370 142 420 Q146 460 138 500" stroke="#2a5a10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M192 308 Q202 368 198 418 Q194 458 202 498" stroke="#2a5a10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="170" cy="615" rx="120" ry="18" fill="#143a08" opacity="0.6"/>
+    <ellipse cx="265" cy="540" rx="45" ry="28" fill="#d4920a" opacity="0.92"/>
+    <ellipse cx="250" cy="532" rx="7" ry="5" fill="#5a3a00" opacity="0.6"/>
+    <ellipse cx="268" cy="525" rx="5" ry="4" fill="#5a3a00" opacity="0.5"/>
+    <ellipse cx="282" cy="535" rx="6" ry="4" fill="#5a3a00" opacity="0.55"/>
+    <ellipse cx="300" cy="528" rx="20" ry="18" fill="#d4920a" opacity="0.95"/>
+    <ellipse cx="316" cy="534" rx="9" ry="7" fill="#c07800" opacity="0.9"/>
+    <ellipse cx="320" cy="531" rx="3" ry="2" fill="#5a3000"/>
+    <ellipse cx="306" cy="523" rx="3" ry="3.5" fill="#1a1a00"/>
+    <circle cx="307" cy="522" r="1" fill="white" opacity="0.8"/>
+    <polygon points="292,514 296,505 302,514" fill="#c07800"/>
+    <polygon points="293,514 296,507 301,514" fill="#d4920a"/>
+    <line x1="318" y1="532" x2="335" y2="529" stroke="#f0d080" stroke-width="0.8" opacity="0.7"/>
+    <line x1="318" y1="534" x2="335" y2="534" stroke="#f0d080" stroke-width="0.8" opacity="0.7"/>
+    <rect x="248" y="562" width="10" height="18" rx="5" fill="#c07800" opacity="0.9"/>
+    <rect x="262" y="564" width="10" height="16" rx="5" fill="#c07800" opacity="0.9"/>
+    <rect x="276" y="563" width="10" height="17" rx="5" fill="#c07800" opacity="0.9"/>
+    <rect x="290" y="562" width="10" height="18" rx="5" fill="#c07800" opacity="0.9"/>
+    <path d="M222 540 Q205 525 210 545 Q215 558 225 552" stroke="#c07800" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <path d="M38 530 Q30 555 32 578 Q34 595 28 610" stroke="#1a9a2a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="40" cy="515" rx="14" ry="10" fill="#1a8a2a"/>
+    <ellipse cx="38" cy="522" rx="9" ry="7" fill="#cc2200"/>
+    <circle cx="52" cy="510" r="9" fill="#2a9a3a"/>
+    <path d="M60 510 L70 512 L60 514 Z" fill="#d4a020"/>
+    <circle cx="55" cy="508" r="2.5" fill="#1a1a1a"/>
+    <path d="M36 512 Q18 498 16 510 Q18 522 36 520 Z" fill="#1a7a2a" opacity="0.9"/>
+  </svg>
+
+  <div class="header">
+    <img src="logo.jpg" alt="Colegio Miraflores" />
+    <div class="nombre">Colegio Miraflores</div>
+    <div class="lema">"México de mis amores"</div>
+    <h1>¡Bienvenidos al sureste mexicano!</h1>
+  </div>
+
+  <div class="menu-grid">
+    <div class="menu-btn" onclick="abrirAR('artistico.jpg')">
+      <div class="emoji">🎨</div><div class="etiqueta">Artístico</div>
+    </div>
+    <div class="menu-btn" onclick="abrirAR('cultural.jpg')">
+      <div class="emoji">🗺️</div><div class="etiqueta">Cultural</div>
+    </div>
+    <div class="menu-btn" onclick="abrirAR('historico.jpg')">
+      <div class="emoji">🛕</div><div class="etiqueta">Histórico</div>
+    </div>
+    <div class="menu-btn" onclick="abrirAR('social.png')">
+      <div class="emoji">👘</div><div class="etiqueta">Social</div>
+    </div>
+    <div class="menu-btn" onclick="abrirAR('gastronomico.png')">
+      <div class="emoji">🍖</div><div class="etiqueta">Gastronómico</div>
+    </div>
+    <div class="menu-btn" onclick="abrirAR('turistico.jpg')">
+      <div class="emoji">🏊</div><div class="etiqueta">Turístico</div>
+    </div>
+  </div>
+</div>
+
+<a-scene
+  id="escena-ar"
+  embedded
+  arjs="sourceType: webcam; debugUIEnabled: false;"
+  renderer="logarithmicDepthBuffer: true; antialias: true;"
+  vr-mode-ui="enabled: false"
+>
+  <a-assets>
+    <img id="infografia-tex" src="" crossorigin="anonymous" />
+  </a-assets>
+
+  <!-- Infografía fija en el mundo, sin marcador -->
+  <a-entity id="marcador">
+    <a-image
+      id="plano-info"
+      src="#infografia-tex"
+      width="2.5"
+      height="1.8"
+      position="0 0 -3"
+      rotation="0 0 0"
+      visible="false"
+    ></a-image>
+  </a-entity>
+
+  <a-entity camera></a-entity>
+</a-scene>
+
+<div id="touch-overlay"></div>
+<button id="btn-volver" onclick="volverMenu()">← Volver al menú</button>
+<div id="instruccion">🌿 Cargando...</div>
+
+<script>
+  var escalaActual = 1;
+  var anchoBase = 2.5;
+  var altoBase = 1.8;
+  var distanciaInicial = 0;
+  var panX = 0, panY = 0;
+  var panInicio = null;
+  var gestosActivos = false;
+
+  function abrirAR(archivo) {
+    document.getElementById('pantalla-inicio').style.display = 'none';
+
+    // IGUAL QUE EL ORIGINAL — sin tocar
+    var plano = document.getElementById('plano-info');
+    plano.setAttribute('visible', 'false');
+    plano.setAttribute('src', '');
+
+    var tex = document.getElementById('infografia-tex');
+    tex.src = '';
+    setTimeout(function() {
+      tex.src = archivo + '?v=' + Date.now();
+      plano.setAttribute('material', 'src: ' + archivo + '?v=' + Date.now() + '; transparent: true;');
+    }, 100);
+
+    document.getElementById('escena-ar').style.display = 'block';
+    document.getElementById('btn-volver').style.display = 'block';
+    document.getElementById('instruccion').style.display = 'block';
+
+    // IGUAL QUE EL ORIGINAL
+    setTimeout(function() {
+      document.getElementById('plano-info').setAttribute('visible', 'true');
+      document.getElementById('instruccion').textContent = '🤏 Pellizca · arrastra para mover';
+      // Activar overlay y gestos DESPUÉS de que la imagen ya es visible
+      document.getElementById('touch-overlay').style.display = 'block';
+      if (!gestosActivos) {
+        activarGestos();
+        gestosActivos = true;
+      }
+    }, 800);
+  }
+
+  function volverMenu() {
+    document.getElementById('escena-ar').style.display = 'none';
+    document.getElementById('touch-overlay').style.display = 'none';
+    document.getElementById('btn-volver').style.display = 'none';
+    document.getElementById('instruccion').style.display = 'none';
+    document.getElementById('infografia-tex').src = '';
+    document.getElementById('plano-info').setAttribute('visible', 'false');
+    document.getElementById('plano-info').setAttribute('position', '0 0 -3');
+    document.getElementById('pantalla-inicio').style.display = 'flex';
+    escalaActual = 1; panX = 0; panY = 0;
+  }
+
+  function activarGestos() {
+    var overlay = document.getElementById('touch-overlay');
+
+    overlay.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        distanciaInicial = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      } else if (e.touches.length === 1) {
+        panInicio = {
+          x: e.touches[0].clientX - panX,
+          y: e.touches[0].clientY - panY
+        };
+      }
+    }, { passive: true });
+
+    overlay.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      var plano = document.getElementById('plano-info');
+      if (e.touches.length === 2) {
+        var dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        var delta = dist / distanciaInicial;
+        escalaActual = Math.min(Math.max(escalaActual * delta, 0.3), 5);
+        plano.setAttribute('width', anchoBase * escalaActual);
+        plano.setAttribute('height', altoBase * escalaActual);
+        distanciaInicial = dist;
+      } else if (e.touches.length === 1 && panInicio) {
+        panX = e.touches[0].clientX - panInicio.x;
+        panY = e.touches[0].clientY - panInicio.y;
+        plano.setAttribute('position', (panX * 0.003) + ' ' + (-panY * 0.003) + ' -3');
+      }
+    }, { passive: false });
+
+    overlay.addEventListener('touchend', function(e) {
+      if (e.touches.length < 1) panInicio = null;
+    }, { passive: true });
+  }
+</script>
+
+</body>
+</html>
